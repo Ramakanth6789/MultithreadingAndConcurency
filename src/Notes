@@ -1,0 +1,465 @@
+##  **Time-slicing Algorithms:**
+
+Processing time for a single core is shared among processes and threads. This is called time-slicing
+
+
+
+## **Advantage of Multithreading:**
+
+To design more responsive applications: we can do several operations concurrently
+
+To achieve better resources utilization(CPU)
+
+To improve performance
+
+## **Disadvantages of Multithreading**: (Multithreading is not always essential)
+
+Some costs involved in multithreading
+
+Threads manipulate memory area which belong to same process(Synchronization)
+
+Not easy to design multithreading application(Easy to make bugs/ hard to detect bugs). modern framework fork-join its getting easier.
+
+Switching between threads is expensive. CPU has to save local data, application pointer etc. of the current thread and has to load the data of the other thread as well.
+
+
+
+Thread States:
+
+- New
+- Runnable
+- Waiting
+- Dead
+
+Join():will wait for a given thread to die(finish execution)
+
+​	ex: thread1.join() the current thread will wait till thread1 is completed execution.
+
+Thread class implements Runnable interface.
+
+Runnable interface is preferred to extending Thread class because Java a given class may implement more interfaces but it can extends a single class exclusively.
+
+**Daemon and Worker Threads:**
+
+A thread in Java can be a **Daemon** Thread or a standard **worker** thread.
+
+Main thread starts when java program starts main method.
+
+We create child threads from the main thread.
+
+Main thread is the last thread to finish as it performs various shutdown operations.
+
+**Daemon Threads** are intended as helper threads(ex: Garbage collection).
+
+
+
+**JVM Creates**
+
+- Main Thread(we can create worker threads as child threads of main thread).
+- Daemon Threads(gc - garbage collection)
+
+**Daemon and Worker Threads:**
+
+​	Daemon threads are a low priority threads that runs in background to perform tasks such as garbage collection. They are usually created for I/O operation or services(NFC or bluetooth communication)
+
+​	Daemon threads are terminated by the JVM when all the other worker threads are terminated(Finish execution)
+
+​	Worker threads are not terminated by JVM, why Daemon threads are interrupted by the JVM
+
+​
+
+**Memory Management**:
+
+Processes run in separate memory spaces
+
+Threads(light-weight processes) run in a shared memory space.
+
+**Stack Memory**: the local variables and method arguments as well as method calls are stored on the stack. It is faster to access.
+
+**Heap Memory**: Objects are stored on the heap memory and live as long as it is referenced from somewhere in the application. comparatively slower than stack memory
+
+Every Thread has its own stack memory but all threads share the Heap memory(Shared memory space)
+
+Synchronization is used for sharing of resources without interference using mutual exclusion.
+
+**Synchronization**
+
+Every object in java has intrinsic lock(Monitor lock)
+
+A Thread that needs exclusive and consistent access to an object's fields has to acquire the object's intrinsic lock before accessing them, and then release the intrinsic lock when it's done with them.
+
+Because of the monitor lock: no 2 threads can execute the same synchronized method at the same time
+
+Synchronized block is prefer over synchronized method.
+
+Synchronized block can throw **NullPointerException** but synchronized method doesn't throw.
+
+**Reentrant Lock**
+
+There is a single intrinsic lock associated with every object or class in Java. A given thread that needs exclusive and consistent access to an object's fields. It has to acquire the object's intrinsic lock before accessing them and then the thread releases the intrinsic lock when it's done with them.
+
+so a thread **cannot acquire a lock owned by another thread**. But a given thread **can acquire a lock that it already owns**. Allowing a thread to acquire the same lock more than once is called **re-entrant synchronization.**
+
+**For example**: let's consider recursive method calls. If a given thread calls a recursive and synchronized method several times then it is fine (note that in this case the same thread "enters" the synchronized block several times). There will be no deadlock because of re-entrant synchronization.
+
+
+
+wait() to suspend a thread
+
+notify() to wake a thread up
+
+Wait() : Wait release lock acquired by the thread.
+
+Calling *wait()* forces the current thread to wait until some other thread invokes *notify()* or *notifyAll()* on the same object.
+
+notify() wait for the current thread to complete and hand over lock to thread initiated wait().
+
+Wait on the object, sleep on Thread itself.
+
+wait can be interrupter(So interrruptedException required) sleep is not
+
+wait and notify must happen in synchronized black on monitor object whereas sleep doesnot
+
+Sleep operation hold the lock, wait release the lock on the object.
+
+
+
+**Volatile**
+
+Volatile variable will read from RAM(main memory not cache) each variable update the latest copy of data will be moved to cache.
+
+Do not use volatile keyword unless necessary( it prevents instruction reordering which is a performance boost technique)
+
+**Deadlock**
+
+Deadlock occurs when two or more threads wait forever for a lock or resource held by another of the threads.
+
+**Livelock**
+
+If both threads act in response to another thread unable to make any progress, Livelock may arise. Threads here are **not blocked**, they are too busy responding to each other to resume work.
+
+**Handling Deadlock and Livelock**
+
+Make sure that a thread does not block infinitely if it is unable to acquire a lock. Using **Lock** interface's **tryLock()** method is convenient and useful.
+
+Make sure each thread acquires lock in the same order to avoid cyclic dependency in lock acquisition.
+
+
+
+**Atomic variable**
+
+It used to avoid inconsistency in multi threaded applications.
+
+There is a branch of research focused on creating non-blocking algorithms for concurrent environments. These algorithms exploit low-level atomic machine instructions such as **compare-and-swap (**CAS), to ensure data integrity.
+
+A typical CAS operation works on three operands:
+
+1. The memory location on which to operate (M)
+2. The existing expected value (A) of the variable
+3. The new value (B) which needs to be set
+
+
+
+**Semaphores**
+
+Semaphores are record of how many units of a particular resource are available. We have to wait until a unit of the resource becomes available again.
+
+**Counting Semaphores**: Allows an arbitrary resource count.
+
+**Binary Semaphores**: Semaphores that are restricted to the values 0 and 1
+
+**Mutexes** (Mutually Exclusion Objects)
+
+It is  property of concurrency control which is instituted for the purpose of preventing race conditions.
+
+Process synchronization plays an important role in maintaining the consistency of shared data
+
+Mutex is very similar to a binary semaphores: while binary semaphores can be used as mutex, a mutex is a more specific use-case.
+
+A **Lock** is designed to enforce a mutual exclusion concurrency control policy
+
+
+
+| SEMAPHORE                                                    | MUTEX                                                        |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| It is a signalling mechanism                                 | It is a locking mechanism                                    |
+| Threads and processes perform wait() and notify() operations to indicate whether they are acquiring or releasing the resource | Threads or process have to acquire the lock on mutex object if it wants to acquire the resource |
+| It allows multiple program threads to access the finite instance of resources(not just a single resource) | it allows multiple program threads to access a single shared resource but one at a time |
+| The process or thread blocks itself if no resource is free till the count of semaphore become greater than 0 | if the lock is already acquired by another thread or process then the thread will wait until the mutex objects gets unlocked |
+
+
+
+**Principle of ownership**.
+
+Ownership is the simple concept that when a task locks (acquires) a mutex only it can unlock (release) it
+
+
+
+## EXECUTORS FRAMEWORK
+
+Why do we use thread pools and Executor framework?
+
+- It will handle everything: schedule and execute the submitted tasks
+- creating and managing threads is expensive
+- adding a new thread for each process leads to the creation of a large number of threads. These threads need memory and CPU will spend too much time switching context when the threads are swapped
+
+
+
+Using Thread pools makes multithreading efficient
+
+Thread pools can reuse threads in an extremely efficient manner by keeping the threads alive and reusing them(Thread pools are usually queues).
+
+Types of executors
+
+1. Single Thread Executor: This has a single thread so we can execute processes in a sequential manner. Every process is executed by a new thread.
+2. Fixed Thread pool: Can create thread pool with n threads. Usually n is the number of cores in CPU. If tasks are more than n these tasks will be stored in LinkedBlockingQueue data structure.
+3. Cache Thread pool: The number of threads is not bounded: if all the threads are busy executing some tasks and a new task comes the pool will create and add a new thread to the executor.
+   1. if a thread remains idle for 60 secs then it will removed
+   2. It is used for short parallel tasks
+4. Scheduled Executor: Can execute given operations at regular intervals or can use this executor if we wish to delay a certain task.
+
+
+
+**Runnable and Callable Interfaces**
+
+Runnable and Callable both run on a different threads than the calling thread but Callable can return a value and Runnable can not
+
+**Runnable:** Run and Forget action. It will not return any value
+
+**Callable<T>:**  Callable interface's call() method if we want to return a given value from the given thread.
+
+Callable's call method throws exception.
+
+- ​	Callable interface will not return the value: this is why we need Future<T> object.
+- ​	Calling Thread will be blocked till the call() method is executed and Future<T> returns with the results.
+
+**Executor Service** can handle both of the interfaces
+
+executorService.execute()
+
+​		It executes a Runnable interface so it means there is no return value(void run() method)
+
+executorService.submit()
+
+​		This method can handle Runnable interface as well as Callable interfaces
+
+​		It can handle a Future<T> return value and we can get the T value with get() on the future object.
+
+
+
+**Latches**:
+
+This is used to synchronize one or more tasks by forcing them to wait for the completion of a set of operations being performed by other tasks
+
+CountDownLatch cannot be reset.
+
+A typical use is to divide a problem into N independently solvable  tasks and create a CountDownLatch with a value of N. When each task is finished it calls countDown() on the latch.
+
+Tasks waiting for the problem to be solved call await() on the latch to hold themselves back until it is completed
+
+Ex: Triggering something after 10000 users download an image!!!
+
+Latch --> multiple threads can wait for each other
+
+A **CyclicBarrier** is used in situations where you want to create a group of tasks to perform work in parallel + wait until they are all finished before moving on to the next step
+
+​		--> something like join()
+
+​		---> something like CountDownLatch
+
+CountdownLatch: one-shot event
+
+CyclicBarrier: it can be reused over and over again
+
+CyclicBarrier has a barrier action: a runnable, that will run automatically when the count reaches 0!!
+
+new CyclicBarrier(N) -> N threads will wait for each other
+
+Latches cant be reused, CyclicBarrier can be reused --> reset()
+
+Runnable in CyclicBarrier constructor will be run once the counter limit reaches 0.
+
+**Blocking Queue:**
+
+Interface that represents a queue that is thread safe
+
+Put items or take items from it..
+
+For ex: one thread putting items into the queue and another thread taking items from it at the same time. This can be done with producer - consumer pattern
+
+put() puts item to queue
+
+take() takes item from the queue
+
+**DelayQueue**
+
+This is an unbounded BlockingQueue of objects that implement the delayed interface
+
+DelayQueue keeps elements internally until a certain delay has expired
+
+An object can only be taken from the queue when its delay has expired!!
+
+Null items cant be placed in queue.
+
+The Queue is sorted so that the object at the head has a delay that has expired for the longest time.
+
+If no delay has expired, then there is no head element and poll() will return null
+
+size() return the count of both expired and unexpired items!!
+
+**PriorityBlockingQueue**
+
+It implements BlockingQueue interface
+
+unbounded concurrent queue
+
+It uses same ordering rules as the java.util.PriorityQueue -> have to implement the comparable interface, which determines the order in queue.
+
+Priority can be same when compare() == 0 case
+
+No Null items allowed
+
+
+
+**The \*Exchanger\* class in Java can be used to share objects between two threads of type \*T\*.**
+
+
+
+**Concurrent Maps**
+
+Map<String,Integer> map = Collections.synchronizedMap(new HashMap<>());
+
+Its not an efficient solution
+
+It uses intrinsic lock which means that independent operations may have to wait for each other
+
+
+
+Concurrent hashMaps:  We can make a map synchronized with defining segments of the underlying array. These segments(16 items) can be updated only by a single thread.
+
+Size of segment can be defined
+
+
+
+We Assign a lock to every segment instead of using a single lock!!!s
+
+Every thread can read any item from the underlying array without restrictions.
+
+
+
+**Exchangers**
+
+Exchanger exchanges objects between two threads
+
+
+
+**CopyOnWriteArray**
+
+If a thread tries to update an Array, copy of array is made and update is done and change will be moved to main array
+
+
+
+**Parallel Computing**
+
+- Depends on the operating system how the threads will be executed
+- If Single processor core, then the time-slicing algorithm executes the threads(multithreading)
+- If Multiple processor cores, then the operating system may execute the threads in parallel
+
+
+
+**Problems with Parallel computing**
+
+- Communication: For sequential algorithms we measure the running time and memory complexity of the algorithms. Here we have to consider the communication factor between the threads.(Parallel slowdown).
+- Load balance: We have to make sure to split the work evenly among the processors. We should make sure that processors should not wait for each other to finish - every processor should do the same amount of work.
+
+
+
+Merge sort:
+
+- divide and conquer algorithms, invented by John von Neumann in 1945
+- Comparison based algorithms
+- O(NlogN)
+- Stable sorting( maintain relative order of items with equal values)
+- Not an inplace approach( it requires O(N) additional memory)
+- heapsort same time complexity as merge sort, but need only O(1) space
+- Efficient quicksort is better than mergesort(Speed)
+- Merge sort is often the best choice for sorting linked list. Needs only O(1) space
+
+
+
+### Fork-Join Framework
+
+Fork-Join framework in an implementation of the ExecutorService interface for parallel execution
+
+This framework helps to make an algorithms parallel
+
+No need to bother about low level Synchronization or Locks
+
+It is divide and conquer mechanism
+
+Larger task can be divided into smaller ones and then we have to combine the subsolutions into the final solution of the problem
+
+Subtask have to be independent in order  to be executed in parallel
+
+Fork-Join framework breaks the task into smaller subtask until these subtasks are simple enough to solve without further breakup
+
+
+
+Recursive<T>
+
+All Tasks we want to execute in parallel is subclass of this class. We have to override the compute() method which return solution of subproblem
+
+RecursiveAction is a task without any return value
+
+
+
+Fork join pool:
+
+Basically it is a thread pool for executing fork-join tasks
+
+Tasks is not equivalent to a thread. Tasks are lightweight threads so fork-join will be efficient even when there are a huge number of tasks
+
+So ForkJoinPool creates a fix number of threads: usually the number of CPU cores
+
+
+
+These threads are executing the tasks but if a thread has no task: it can task from more busy threads- tasks are distributed to all threads in the thread pool
+
+Fork-join framework can handle the problem of load balancing quite efficiently!!
+
+
+
+fork() - asynchronously executes the given tasks in the pool. We can call it when using RecursiveTask<T> or RecursiveAction
+
+join() - returns the result of the combination when it is finished
+
+invoke() - executes the given task + wait + return the result up on completion
+
+
+
+Map Reduce:
+
+Building block of Big data
+
+MapReduce is programming model, way of structuring the computation that allows it  easily  to be run on lot of node
+
+It follows three steps:
+
+1. map: splits the original dataset.
+2. shuffle&sort:  all the data is rearrange for the next step to run in parallel.
+3. reduce:  combine the final results.
+
+MapReduce vs ForkJoin:
+
+ForkJoin is designed to work on JVM. MapReduce is designed to work on a large cluster of nodes.
+
+ForkJoin split the task in to multiple tasks, in recursive manner. MapReduce does only one split.
+
+
+
+
+
+
+
+
+
